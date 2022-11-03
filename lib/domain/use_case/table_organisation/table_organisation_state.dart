@@ -1,31 +1,21 @@
 part of 'table_organisation_bloc.dart';
 
 @immutable
-abstract class TableOrganisationState {}
+abstract class TableOrganisationInitState {}
 
-class TableOrganisationInitial extends TableOrganisationState {
-  List<PlutoRow> rowsInic = rowse;
+List<PlutoRow> _organisationsRows = [];
+List<List<PlutoRow>> _contractsRows = [];
+int _selectedOrganisationRow = -1;
+int _selectedContractRow = -1;
+Map<PlutoRow, List<PlutoRow>> _searchedTable = {};
+bool _isSearching = false;
+
+class TableOrganisationState extends TableOrganisationInitState {
+  final List<PlutoRow> organisationsRows;
+  TableOrganisationState({required this.organisationsRows});
 }
 
-class TableOrganisationInitialState extends TableOrganisationState {
-  List<PlutoRow> rowsConsumers;
-
-  TableOrganisationInitialState(this.rowsConsumers);
+class TableContractState extends TableOrganisationInitState {
+  final List<PlutoRow> contractsRows;
+  TableContractState({required this.contractsRows});
 }
-
-List<PlutoRow> rowse = [
-  PlutoRow(
-    cells: {
-      'text_field': PlutoCell(value: 'Text cell value1'),
-      'text_Adres': PlutoCell(value: 'item1'),
-      'text_Chief': PlutoCell(value: '2020-08-06'),
-    },
-  ),
-  PlutoRow(
-    cells: {
-      'text_field': PlutoCell(value: 'Text cell value2'),
-      'text_Adres': PlutoCell(value: 'item2'),
-      'text_Chief': PlutoCell(value: '2020-08-07'),
-    },
-  ),
-];
