@@ -49,7 +49,7 @@ class _TableAgreementsState extends State<TableAgreements> {
                 BlocProvider.of<TableOrganisationBloc>(context);
             tableOrganisationBloc
                 .add(ChangedSelectedContractEvent(selectedRow: event.rowIdx));
-            print(event.rowIdx);
+            //  print(event.rowIdx);
           },
           onChanged: (PlutoGridOnChangedEvent event) {
             // print(event);

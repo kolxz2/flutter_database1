@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_database1/ui/pages/main_screan/main_screan_widget.dart';
 import 'package:window_size/window_size.dart';
 
+import 'data/repositoy/tables_repositoy_impl.dart';
+import 'domain/repository/tables_repository.dart';
 import 'domain/use_case/table_organisation/table_organisation_bloc.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -35,14 +37,16 @@ class MyApp extends StatelessWidget {
 }
 
 class BlocWrapper extends StatelessWidget {
-  const BlocWrapper({Key? key}) : super(key: key);
+  BlocWrapper({Key? key}) : super(key: key);
 
+  final TablesRepository repository = TablesRepositoryImplementation();
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => TableOrganisationBloc(),
+          create: (context) => TableOrganisationBloc()
+            ..add(LoadingDataOrganisation(repository: repository)),
         ),
       ],
       child: MainScreen(),

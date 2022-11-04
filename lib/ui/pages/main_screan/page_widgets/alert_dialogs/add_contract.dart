@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../data/repositoy/tables_repositoy_impl.dart';
+import '../../../../../domain/repository/tables_repository.dart';
 import '../../../../../domain/use_case/table_organisation/table_organisation_bloc.dart';
 import '../../../../const/button_styles.dart';
 
@@ -19,6 +21,7 @@ class _AddContractAlertState extends State<AddContractAlert> {
   TextEditingController contractCoast = TextEditingController();
 
   final TableOrganisationBloc tableOrganisationBloc;
+  final TablesRepository repository = TablesRepositoryImplementation();
 
   _AddContractAlertState({required this.tableOrganisationBloc});
 
@@ -63,7 +66,9 @@ class _AddContractAlertState extends State<AddContractAlert> {
           onPressed: () {
             Navigator.pop(context);
             tableOrganisationBloc.add(AddContractEvent(
-                contractCoast: contractCoast.text, date: selectedDate));
+                repository: repository,
+                contractCoast: contractCoast.text,
+                date: selectedDate));
           },
           child: const Text('Edit'),
         ),

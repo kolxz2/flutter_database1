@@ -56,7 +56,7 @@ class _TableCustomersState extends State<TableCustomers> {
                 BlocProvider.of<TableOrganisationBloc>(context);
             tableOrganisationBloc.add(
                 ChangedSelectedOrganisationEvent(selectedRow: event.rowIdx));
-            print(event.rowIdx);
+            // print(event.rowIdx);
           },
           onLoaded: (event) => stateManager = event.stateManager,
         );

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_database1/data/repositoy/tables_repositoy_impl.dart';
 import 'package:flutter_database1/domain/use_case/table_organisation/table_organisation_bloc.dart';
 import 'package:flutter_database1/main.dart';
 
+import '../../../../domain/repository/tables_repository.dart';
 import '../../../const/button_styles.dart';
 import 'alert_dialogs/add_contract.dart';
 import 'alert_dialogs/add_organisation.dart';
@@ -19,6 +21,8 @@ class TablesEditor extends StatefulWidget {
 }
 
 class _TablesEditorState extends State<TablesEditor> {
+  final TablesRepository repository = TablesRepositoryImplementation();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -58,7 +62,8 @@ class _TablesEditorState extends State<TablesEditor> {
               onPressed: () {
                 final tableOrganisationBloc =
                     BlocProvider.of<TableOrganisationBloc>(context);
-                tableOrganisationBloc.add(DeleteOrganisationEvent());
+                tableOrganisationBloc
+                    .add(DeleteOrganisationEvent(repository: repository));
               },
               child: const Text("Delete organisation")),
           ElevatedButton(
@@ -90,7 +95,8 @@ class _TablesEditorState extends State<TablesEditor> {
               onPressed: () {
                 final tableOrganisationBloc =
                     BlocProvider.of<TableOrganisationBloc>(context);
-                tableOrganisationBloc.add(DeleteContractEvent());
+                tableOrganisationBloc
+                    .add(DeleteContractEvent(repository: repository));
               },
               child: const Text("Delete contract")),
         ],

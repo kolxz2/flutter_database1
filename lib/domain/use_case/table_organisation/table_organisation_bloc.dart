@@ -2,6 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../repository/tables_repository.dart';
+
 part 'table_organisation_event.dart';
 part 'table_organisation_state.dart';
 
@@ -18,12 +20,21 @@ class TableOrganisationBloc
     on<DeleteContractEvent>(_deleteContractEvent);
     on<DeleteOrganisationEvent>(_deleteOrganisationEvent);
     on<SearchByChiefEvent>(_searchByChiefEvent);
+    on<LoadingDataOrganisation>(_loadingDateOrganisation);
+  }
+
+  _loadingDateOrganisation(LoadingDataOrganisation event,
+      Emitter<TableOrganisationInitState> emit) async {
+    _organisationsRows = await event.repository.onStartLoadOrganisationsRows();
+    emit(TableOrganisationState(organisationsRows: _organisationsRows));
   }
 
   _searchByChiefEvent(
       SearchByChiefEvent event, Emitter<TableOrganisationInitState> emit) {
     _searchedTable.clear();
     _isSearching = true;
+
+    // если пришли все данные
     if (event.adresSearch != "" &&
         event.organisationSearch != "" &&
         event.chiefSearch != "" &&
@@ -37,7 +48,7 @@ class TableOrganisationBloc
         // достаём Map из PlutoRow c данными в одной стрчке
         var organisationRow = item.cells.values.map((e) => e.value);
         // выводим элемент MAp -> 1 == полю адреса
-        print(organisationRow.elementAt(1));
+        //    print(organisationRow.elementAt(1));
         // сравниваем что совпадает значение адреса в строчке с искомым адресом
         if (organisationRow.elementAt(1) == adresSearch &&
             organisationRow.elementAt(0) == organisationSearch &&
@@ -45,10 +56,18 @@ class TableOrganisationBloc
           // записываем в Мар строчку т.к. она подходит и в значение
           // кладём соостветсвующий список из контрактов
           _searchedTable.addAll({item: []});
+          // переменаая для хранения всех подходящих по дате элементов
           List<PlutoRow> selectedDate = [];
+          // проходимся по списку из контраков соответсующей оранизации
           for (var contractsItem in _contractsRows[operation]) {
+            // возращаеться список из значений ы строке -> (сумма, дата сделки)
             var contractRow = contractsItem.cells.values.map((e) => e.value);
-            if (contractRow.elementAt(1) == dataSearch.toString()) {
+            // из списка забираем дату сделки она типа String
+            var date = contractRow.elementAt(1);
+            // пребразуем дату по которой производиться поиск в строку и берём
+            // первые 10 символов, т.к. DateTime содержит ещё и минуты и секунды
+            var dateSerched = dataSearch.toLocal().toString().substring(0, 10);
+            if (date == dateSerched) {
               selectedDate.add(contractsItem);
             }
           }
@@ -58,20 +77,83 @@ class TableOrganisationBloc
       }
       emit(TableOrganisationState(
           organisationsRows: _searchedTable.keys.toList()));
-    } else if (event.adresSearch != "") {
+    }
+    // пришли данные толко адреса
+    else if (event.adresSearch != "") {
       var adresSearch = event.adresSearch;
       int operation = 0;
       for (var item in _organisationsRows) {
         // достаём Map из PlutoRow c данными в одной стрчке
         var adresRow = item.cells.values.map((e) => e.value);
         // выводим элемент MAp -> 1 == полю адреса
-        print(adresRow.elementAt(1));
+        //  print(adresRow.elementAt(1));
         // сравниваем что совпадает значение адреса в строчке с искомым адресом
         if (adresRow.elementAt(1) == adresSearch) {
           // записываем в Мар строчку т.к. она подходит и в значение
           // кладём соостветсвующий список из контрактов
           _searchedTable.addAll({item: _contractsRows[operation]});
         }
+        operation += 1;
+      }
+      emit(TableOrganisationState(
+          organisationsRows: _searchedTable.keys.toList()));
+    }
+    // пришли данные о начальнике
+    else if (event.chiefSearch != "") {
+      var chiefSearch = event.chiefSearch;
+      int operation = 0;
+      for (var item in _organisationsRows) {
+        // достаём Map из PlutoRow c данными в одной стрчке
+        var adresRow = item.cells.values.map((e) => e.value);
+        // выводим элемент MAp -> 2 == полю шефа
+        //     print(adresRow.elementAt(2));
+        // сравниваем что совпадает значение адреса в строчке с искомым адресом
+        if (adresRow.elementAt(2) == chiefSearch) {
+          // записываем в Мар строчку т.к. она подходит и в значение
+          // кладём соостветсвующий список из контрактов
+          _searchedTable.addAll({item: _contractsRows[operation]});
+        }
+        operation += 1;
+      }
+      emit(TableOrganisationState(
+          organisationsRows: _searchedTable.keys.toList()));
+    }
+    // пришли данные о оранизации
+    else if (event.organisationSearch != "") {
+      var organisationSearch = event.organisationSearch;
+      int operation = 0;
+      for (var item in _organisationsRows) {
+        // достаём Map из PlutoRow c данными в одной стрчке
+        var adresRow = item.cells.values.map((e) => e.value);
+        // выводим элемент MAp -> 0 == полю имени организации
+        //     print(adresRow.elementAt(0));
+        // сравниваем что совпадает значение адреса в строчке с искомым адресом
+        if (adresRow.elementAt(0) == organisationSearch) {
+          // записываем в Мар строчку т.к. она подходит и в значение
+          // кладём соостветсвующий список из контрактов
+          _searchedTable.addAll({item: _contractsRows[operation]});
+        }
+        operation += 1;
+      }
+      emit(TableOrganisationState(
+          organisationsRows: _searchedTable.keys.toList()));
+    }
+    // пришли данные с датой контрактов
+    else if (event.searcherByDate != false) {
+      var dataSearch = event.dataSearch;
+      int operation = 0;
+      _organisationsRows.map((e) => _searchedTable[e] = []);
+      for (var item in _organisationsRows) {
+        List<PlutoRow> correctDate = [];
+        for (var contractsItem in _contractsRows[operation]) {
+          var contractRow = contractsItem.cells.values.map((e) => e.value);
+          var date = contractRow.elementAt(1);
+          var dateSerched = dataSearch.toLocal().toString().substring(0, 10);
+          if (date == dateSerched) {
+            correctDate.add(contractsItem);
+          }
+        }
+        _searchedTable[item] = correctDate;
         operation += 1;
       }
       emit(TableOrganisationState(
@@ -129,21 +211,87 @@ class TableOrganisationBloc
   _changedSelectedContractEvent(ChangedSelectedContractEvent event,
       Emitter<TableOrganisationInitState> emit) {
     _selectedContractRow = event.selectedRow!;
-    print("_selectedContractRow ${event.selectedRow!}");
+    //   print("_selectedContractRow ${event.selectedRow!}");
   }
 
   _editClientEvent(
       EditClientEvent event, Emitter<TableOrganisationInitState> emit) {
-    _isSearching = false;
-    final item = PlutoRow(
+    final itemRow = PlutoRow(
       cells: {
         'text_field': PlutoCell(value: event.organisation),
         'text_Adres': PlutoCell(value: event.adres),
         'text_Chief': PlutoCell(value: event.chief),
       },
     );
-    _organisationsRows[_selectedOrganisationRow] = item;
-    emit(TableOrganisationState(organisationsRows: _organisationsRows));
+    if (_isSearching == false) {
+      _organisationsRows[_selectedOrganisationRow] = itemRow;
+      emit(TableOrganisationState(organisationsRows: _organisationsRows));
+    } else {
+      // получили элемент который выбрал пользователь во временном Map
+      var editingOrganisationSearch =
+          _searchedTable.keys.elementAt(_selectedOrganisationRow);
+      // создаём новый список и изменеённым значением кулюча (PlutoRow)
+      Map<PlutoRow, List<PlutoRow>> searchedTableTemp =
+          _searchedTable.map((key, value) {
+        if (editingOrganisationSearch == key) {
+          return MapEntry(itemRow, value);
+        } else {
+          return MapEntry(key, value);
+        }
+      });
+
+      int position = 0;
+      // поиск соответсвующего элемента в спике оранизаций c запоминаем его позицию
+      for (var item in _organisationsRows) {
+        if (item == editingOrganisationSearch) {
+          // меняем данные в основном списке
+          _organisationsRows[position] = itemRow;
+          // меняем значения скиска
+          _searchedTable = searchedTableTemp;
+        }
+        position += 1;
+      }
+
+      emit(TableOrganisationState(
+          organisationsRows: _searchedTable.keys.toList()));
+    }
+
+    //  _isSearching = false;
+  }
+
+  _editContractEvent(
+      EditContractEvent event, Emitter<TableOrganisationInitState> emit) {
+    // _isSearching = false;
+    final itemRow = PlutoRow(
+      cells: {
+        'number_field': PlutoCell(value: event.contractCoast),
+        'date_field': PlutoCell(value: event.date),
+      },
+    );
+    if (_isSearching == false) {
+      _contractsRows[_selectedOrganisationRow][_selectedContractRow] = itemRow;
+      emit(TableContractState(
+          contractsRows: _contractsRows[_selectedOrganisationRow]));
+    } else {
+      // получили элемент который выбрал пользователь во временном Map в организациях
+      var editingOrganisationSearch =
+          _searchedTable.keys.elementAt(_selectedOrganisationRow);
+      // меняем в поисковом Map значение в списке контрактов по выбранной организации
+      var tempListContracts = _searchedTable[editingOrganisationSearch];
+      tempListContracts![_selectedContractRow] = itemRow;
+      _searchedTable[editingOrganisationSearch] = tempListContracts;
+      int position = 0;
+      // поиск соответсвующего элемента в спике оранизаций c запоминаем его позицию
+      for (var item in _organisationsRows) {
+        if (item == editingOrganisationSearch) {
+          // если организация найдена изменяем данные о контракте
+          _contractsRows[position][_selectedContractRow] = itemRow;
+        }
+        position += 1;
+      }
+      emit(TableOrganisationState(
+          organisationsRows: _searchedTable.keys.toList()));
+    }
   }
 
   _addContractEvent(
@@ -157,20 +305,6 @@ class TableOrganisationBloc
     );
     _contractsRows[_selectedOrganisationRow]
         .insert(_selectedContractRow + 1, item);
-    emit(TableContractState(
-        contractsRows: _contractsRows[_selectedOrganisationRow]));
-  }
-
-  _editContractEvent(
-      EditContractEvent event, Emitter<TableOrganisationInitState> emit) {
-    _isSearching = false;
-    final item = PlutoRow(
-      cells: {
-        'number_field': PlutoCell(value: event.contractCoast),
-        'date_field': PlutoCell(value: event.date),
-      },
-    );
-    _contractsRows[_selectedOrganisationRow][_selectedContractRow] = item;
     emit(TableContractState(
         contractsRows: _contractsRows[_selectedOrganisationRow]));
   }

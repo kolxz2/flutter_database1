@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../data/repositoy/tables_repositoy_impl.dart';
+import '../../../../../domain/repository/tables_repository.dart';
 import '../../../../../domain/use_case/table_organisation/table_organisation_bloc.dart';
 
 class AddOrganisationAlert extends StatelessWidget {
-  const AddOrganisationAlert({Key? key, required this.tableOrganisationBloc})
+  AddOrganisationAlert({Key? key, required this.tableOrganisationBloc})
       : super(key: key);
 
+  final TablesRepository repository = TablesRepositoryImplementation();
   final TableOrganisationBloc tableOrganisationBloc;
   @override
   Widget build(BuildContext context) {
@@ -65,6 +68,7 @@ class AddOrganisationAlert extends StatelessWidget {
           onPressed: () {
             Navigator.pop(context);
             tableOrganisationBloc.add(AddClientEvent(
+                repository: repository,
                 adres: adres.text,
                 chief: chief.text,
                 organisation: organisation.text));
