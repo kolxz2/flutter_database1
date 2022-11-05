@@ -1,20 +1,35 @@
 import 'package:pluto_grid/pluto_grid.dart';
 
 abstract class TablesRepository {
-  Future<List<PlutoRow>> onStartLoadOrganisationsRows() async {
-    List<PlutoRow> loadedList = [];
+  Future<Map<PlutoRow, List<PlutoRow>>> onStartLoadOrganisationsRows() async {
+    Map<PlutoRow, List<PlutoRow>> loadedList = {};
     return loadedList;
   }
 
-  onAddOrganisation() {}
+  Future<void> onAddOrganisation(
+      String organisation, String chief, String adres) async {}
 
-  onDeleteOrganisation() {}
+  Future<void> onDeleteOrganisation(
+      String organisation, String chief, String adres) async {}
 
-  onEditOrganisation() {}
+  Future<void> onEditOrganisation(
+      String organisation,
+      String chief,
+      String adres,
+      String organisationOld,
+      String chiefOld,
+      String adresOld) async {}
 
-  onAddContract() {}
+  Future<void> onAddContract(String organisation, String chief, String adres,
+      double coast, DateTime date) async {}
 
-  onEditContract() {}
+  Future<void> onEditContract(String organisation, String chief, String adres,
+      double coast, DateTime date, double coastOld, DateTime dateOld) async {}
 
-  onDeleteContract() {}
+  Future<void> onDeleteContract(
+    String organisation,
+    String chief,
+    String adres,
+    int index,
+  ) async {}
 }

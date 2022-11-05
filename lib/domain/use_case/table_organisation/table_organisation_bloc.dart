@@ -25,7 +25,11 @@ class TableOrganisationBloc
 
   _loadingDateOrganisation(LoadingDataOrganisation event,
       Emitter<TableOrganisationInitState> emit) async {
-    _organisationsRows = await event.repository.onStartLoadOrganisationsRows();
+    _searchedTable = await event.repository.onStartLoadOrganisationsRows();
+    _organisationsRows = _searchedTable.keys.toList();
+    for (var item in _searchedTable.values) {
+      _contractsRows.add(item);
+    }
     emit(TableOrganisationState(organisationsRows: _organisationsRows));
   }
 
@@ -164,6 +168,8 @@ class TableOrganisationBloc
   _deleteContractEvent(
       DeleteContractEvent event, Emitter<TableOrganisationInitState> emit) {
     _isSearching = false;
+    event.repository.onDeleteContract(_getOrganisation()[0],
+        _getOrganisation()[2], _getOrganisation()[1], _selectedContractRow);
     _contractsRows[_selectedOrganisationRow].removeAt(_selectedContractRow);
     emit(TableContractState(
         contractsRows: _contractsRows[_selectedOrganisationRow]));
@@ -172,8 +178,11 @@ class TableOrganisationBloc
   _deleteOrganisationEvent(
       DeleteOrganisationEvent event, Emitter<TableOrganisationInitState> emit) {
     _isSearching = false;
+    event.repository.onDeleteOrganisation(
+        _getOrganisation()[0], _getOrganisation()[2], _getOrganisation()[1]);
     _organisationsRows.removeAt(_selectedOrganisationRow);
     _contractsRows.removeAt(_selectedOrganisationRow);
+
     emit(TableOrganisationState(organisationsRows: _organisationsRows));
   }
 
@@ -187,7 +196,8 @@ class TableOrganisationBloc
         'text_Chief': PlutoCell(value: event.chief),
       },
     );
-
+    event.repository
+        .onAddOrganisation(event.organisation, event.chief, event.adres);
     _organisationsRows.insert(_selectedOrganisationRow + 1, item);
     _contractsRows.insert(_selectedOrganisationRow + 1, []);
     emit(TableOrganisationState(organisationsRows: _organisationsRows));
@@ -223,6 +233,14 @@ class TableOrganisationBloc
         'text_Chief': PlutoCell(value: event.chief),
       },
     );
+    event.repository.onEditOrganisation(
+        event.organisation,
+        event.chief,
+        event.adres,
+        _getOrganisation()[0],
+        _getOrganisation()[2],
+        _getOrganisation()[1]);
+
     if (_isSearching == false) {
       _organisationsRows[_selectedOrganisationRow] = itemRow;
       emit(TableOrganisationState(organisationsRows: _organisationsRows));
@@ -268,6 +286,20 @@ class TableOrganisationBloc
         'date_field': PlutoCell(value: event.date),
       },
     );
+    var oldContract = _contractsRows[_selectedOrganisationRow]
+            [_selectedContractRow]
+        .cells
+        .values
+        .map((e) => e.value.toString())
+        .toList();
+    event.repository.onEditContract(
+        _getOrganisation().elementAt(0),
+        _getOrganisation().elementAt(2),
+        _getOrganisation().elementAt(1),
+        double.parse(event.contractCoast),
+        event.date,
+        double.parse(oldContract.elementAt(0)),
+        DateTime.parse(oldContract.elementAt(1)));
     if (_isSearching == false) {
       _contractsRows[_selectedOrganisationRow][_selectedContractRow] = itemRow;
       emit(TableContractState(
@@ -303,9 +335,20 @@ class TableOrganisationBloc
         'date_field': PlutoCell(value: event.date),
       },
     );
+    event.repository.onAddContract(_getOrganisation()[0], _getOrganisation()[2],
+        _getOrganisation()[1], double.parse(event.contractCoast), event.date);
     _contractsRows[_selectedOrganisationRow]
         .insert(_selectedContractRow + 1, item);
     emit(TableContractState(
         contractsRows: _contractsRows[_selectedOrganisationRow]));
   }
+}
+
+List<String> _getOrganisation() {
+  List<String> list = _organisationsRows[_selectedOrganisationRow]
+      .cells
+      .values
+      .map((e) => e.value.toString())
+      .toList();
+  return list;
 }
