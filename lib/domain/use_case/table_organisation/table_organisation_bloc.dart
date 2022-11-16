@@ -9,7 +9,7 @@ part 'table_organisation_state.dart';
 
 class TableOrganisationBloc
     extends Bloc<TableOrganisationEvent, TableOrganisationInitState> {
-  TableOrganisationBloc()
+  TableOrganisationBloc({required this.repository})
       : super(TableOrganisationState(organisationsRows: [])) {
     on<AddClientEvent>(_addClientEvent);
     on<ChangedSelectedOrganisationEvent>(_changedSelectedOrganisationEvent);
@@ -22,10 +22,11 @@ class TableOrganisationBloc
     on<SearchByChiefEvent>(_searchByChiefEvent);
     on<LoadingDataOrganisation>(_loadingDateOrganisation);
   }
+  final TablesRepository repository;
 
   _loadingDateOrganisation(LoadingDataOrganisation event,
       Emitter<TableOrganisationInitState> emit) async {
-    _searchedTable = await event.repository.onStartLoadOrganisationsRows();
+    _searchedTable = await repository.onStartLoadOrganisationsRows();
     _organisationsRows = _searchedTable.keys.toList();
     for (var item in _searchedTable.values) {
       _contractsRows.add(item);

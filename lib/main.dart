@@ -45,7 +45,8 @@ class BlocWrapper extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => TableOrganisationBloc()
+          create: (context) => TableOrganisationBloc(
+              repository: TablesRepositoryImplementation())
             ..add(LoadingDataOrganisation(repository: repository)),
         ),
       ],

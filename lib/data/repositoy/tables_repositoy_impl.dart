@@ -12,12 +12,12 @@ class TablesRepositoryImplementation implements TablesRepository {
   final databaseFactory = databaseFactoryFfi;
 
   TablesRepositoryImplementation() {
+    sqfliteFfiInit();
     path = "$_appSupportDirectory\\demo.db";
   }
 
   @override
   Future<Map<PlutoRow, List<PlutoRow>>> onStartLoadOrganisationsRows() async {
-    sqfliteFfiInit();
     Map<PlutoRow, List<PlutoRow>> loadedList = {};
 
     _database = await databaseFactory.openDatabase(path);
@@ -63,8 +63,8 @@ class TablesRepositoryImplementation implements TablesRepository {
           });
           valueValue.add(valueItem);
         }
-        loadedList[keyValue] = valueValue;
       }
+      loadedList[keyValue] = valueValue;
     }
     await _database.close();
     return loadedList;

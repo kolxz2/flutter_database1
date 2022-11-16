@@ -46,7 +46,7 @@ class _TableAgreementsState extends State<TableAgreements> {
           rows: [],
           onSelected: (PlutoGridOnSelectedEvent event) {
             final tableOrganisationBloc =
-                BlocProvider.of<TableOrganisationBloc>(context);
+            BlocProvider.of<TableOrganisationBloc>(context);
             tableOrganisationBloc
                 .add(ChangedSelectedContractEvent(selectedRow: event.rowIdx));
             //  print(event.rowIdx);
@@ -55,7 +55,7 @@ class _TableAgreementsState extends State<TableAgreements> {
             // print(event);
           },
           onLoaded: (PlutoGridOnLoadedEvent event) =>
-              stateManager = event.stateManager,
+          stateManager = event.stateManager,
         );
       },
     );
